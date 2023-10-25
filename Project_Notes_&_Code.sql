@@ -163,7 +163,38 @@ CREATE TABLE analytics (
 
 -- Test and make sure data was imported into tables
 
-SELECT 	visitstarttime, *
-FROM	analytics
-WHERE visitid = '1498925842'
+-- Find null values
+
+SELECT 	currencycode
+FROM	all_sessions
+limit 5000
+
+
+SELECT
+	COUNT(*) AS null_count
+FROM
+	all_sessions
+WHERE date IS NULL
+
+-- Remove duplicates
+
+SELECT 	*
+FROM	sales_report
+limit 5000
+
+SELECT productsku, COUNT(*)
+FROM sales_report
+GROUP BY 1
+HAVING COUNT(*) > 1
+ORDER BY 1
+
+-- Formatting
+
+SELECT *
+FROM all_sessions
+WHERE CAST(productprice AS NUMERIC) BETWEEN 0 AND 100
 LIMIT 1000
+
+SELECT (CAST(productprice AS FLOAT)/1000000)
+FROM all_sessions
+
