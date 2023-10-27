@@ -2,6 +2,7 @@
 
 ## Technology Used
 	- PostgreSQL
+	- PosgreSQL Documentation
 	- pgAdmin
 	- ChatGPT (For Syntax search and to help structure my readme writing Only)
 	- Google Search
@@ -11,7 +12,7 @@
 This project serves to show the application of the skills and concepts we learned throughout the first 6 weeks of the course. The objectives include:
 
 	- Data Extraction: Retrieve data from a SQL database for further manipulation.
-	- Data Transformation and Analysis: Clean and transform the raw data to facilitate insightful analysis.
+	- Data Transformation and Analysis: Clean and transform the raw data to facilitate analysis.
 	- Data Loading: Import the transformed data back into a database.
 	- Quality Assurance: Implement a robust QA process to validate the transformed data against its raw counterpart.
 

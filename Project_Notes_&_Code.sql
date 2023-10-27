@@ -3,6 +3,8 @@
 
 -- Importing all_sessions file --
 -- 1. Create Table
+
+-- ERD Tool very handy for creating tables and generating SQL code to create them.
 CREATE TABLE all_sessions (
   fullVisitorId INTEGER,
   channelGrouping TEXT,
@@ -179,7 +181,7 @@ WHERE date IS NULL
 -- Remove duplicates
 
 SELECT 	*
-FROM	sales_report
+FROM	all_sessions
 limit 5000
 
 SELECT productsku, COUNT(*)
@@ -190,11 +192,172 @@ ORDER BY 1
 
 -- Formatting
 
-SELECT *
-FROM all_sessions
-WHERE CAST(productprice AS NUMERIC) BETWEEN 0 AND 100
+SELECT al.fullvisitorid,
+		a.fullvisitorid
+		--COUNT(distinct al.fullvisitorid),
+		--COUNT(distinct al.fullvisitorid)
+FROM all_sessions al
+JOIN analytics a ON al.fullvisitorid = a.fullvisitorid
+GROUP BY 1,2
+ORDER BY 3,4 DESC
+WHERE al.fullvisitorid LIKE '%71671%'
+OR a.fullvisitorid LIKE '%71671%'
+GROUP BY 1, 2
 LIMIT 1000
 
-SELECT (CAST(productprice AS FLOAT)/1000000)
-FROM all_sessions
+SELECT
+	substring(ltrim(al.fullvisitorID, '0') from 1 for 6),
+	substring(ltrim(a.fullvisitorID, '0') from 1 for 6)
+FROM all_sessions al
+JOIN analytics a ON al.visitid = a.visitid
+GROUP BY 1,2
 
+
+UPDATE analytics
+	SET fullvisitorID = substring(ltrim(fullvisitorID, '0') from 1 for 6);
+
+UPDATE products
+	SET SKU = RIGHT(SKU, 5);
+	
+SELECT sku
+FROM products
+WHERE sku LIKE '%2785'
+
+SELECT sku
+FROM products
+
+SELECT 	sku,
+		RIGHT(SKU, 5),
+		'SKU-' || ROW_NUMBER() OVER (ORDER BY sku)
+FROM products
+ORDER BY sku
+
+SELECT *
+FROM sales_report
+
+SELECT *
+FROM products
+WHERE sku LIKE '%80814%'
+
+UPDATE products
+	SET sku = RIGHT(SKU, 6);
+	
+UPDATE all_sessions
+	SET productsku = RIGHT(productsku, 6);
+	
+UPDATE sales_by_sku
+	SET productsku = RIGHT(productsku, 6);
+	
+UPDATE sales_report
+	SET productsku = RIGHT(productsku, 6);
+	
+SELECT *
+FROM analytics
+WHERE revenue IS NOT NULL
+LIMIT 1000
+
+SELECT *
+FROM
+	sales_report
+LIMIT 1000
+
+
+UPDATE sales_report
+SET totaltransactionrevenue = CAST(totaltransactionrevenue AS FLOAT) / 1000000;
+
+ALTER TABLE analytics
+	ALTER COLUMN unit_price TYPE FLOAT USING CAST(unit_price AS FLOAT);
+	
+ALTER TABLE all_sessions
+	ALTER COLUMN fullvisitorid TYPE INT USING fullvisitorid::INT
+
+
+ALTER TABLE analytics
+ALTER COLUMN bounces TYPE SMALLINT USING bounces::SMALLINT;
+
+ALTER TABLE products
+	ALTER COLUMN restockingleadtime TYPE SMALLINT USING CAST(restockingleadtime AS SMALLINT);
+
+UPDATE all_sessions
+	SET itemrevenue = CAST(itemrevenue AS NUMERIC) / 1000000;
+
+	ALTER TABLE all_sessions
+	ALTER COLUMN itemrevenue TYPE NUMERIC(10,2) USING CAST(itemrevenue AS NUMERIC(10,2));
+	
+UPDATE products
+SET name = ltrim(name);
+
+SELECT *
+FROM all_sessions;
+LIMIT 1000;
+
+SELECT name, sku, restockingleadtime
+FROM products
+WHERE restockingleadtime > (SELECT AVG(restockingleadtime) + 3 * STDDEV(restockingleadtime) FROM products)
+   OR restockingleadtime < (SELECT AVG(restockingleadtime) - 3 * STDDEV(restockingleadtime) FROM products)
+GROUP BY 1, 2, 3
+
+DISCARD PLANS;
+SELECT * FROM all_sessions LIMIT 1000;
+
+SELECT *
+FROM all_sessions
+LIMIT 1
+
+SELECT 	city,
+		SUM(totaltransactionrevenue)
+FROM visitors
+WHERE city != 'N/A'
+GROUP BY 1
+ORDER BY 2 DESC
+
+SELECT 	country,
+		SUM(totaltransactionrevenue)
+FROM visitors
+GROUP BY 1
+ORDER BY 2 DESC
+
+UPDATE all_sessions SET productrevenue = 0 WHERE productrevenue IS NULL;
+
+
+SELECT *
+FROM all_sessions
+LIMIT 1
+
+SELECT *
+FROM all_sessions
+LIMIT 1
+
+WITH sku_count AS (
+	SELECT
+		al.fullvisitorid,
+		country,
+		city,
+		COUNT(DISTINCT productsku) AS total_products
+	FROM all_sessions al
+	JOIN visitors v ON al.fullvisitorid = v.fullvisitorid
+	GROUP BY 1,2,3
+)
+
+SELECT
+	CAST(AVG(total_products) AS NUMERIC(10,2))
+FROM
+	sku_count
+ORDER BY 1 DESC
+
+WITH sku_count AS (
+	SELECT
+		city,
+		COUNT(DISTINCT productsku) AS total_products
+	FROM all_sessions al
+	JOIN visitors v ON al.fullvisitorid = v.fullvisitorid
+	GROUP BY 1
+)
+
+SELECT
+	city,
+	CAST(AVG(total_products) AS NUMERIC(10,2))
+FROM
+	sku_count
+GROUP BY 1
+ORDER BY 2 DESC
