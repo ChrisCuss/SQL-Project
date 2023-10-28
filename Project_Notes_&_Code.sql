@@ -361,3 +361,44 @@ FROM
 	sku_count
 GROUP BY 1
 ORDER BY 2 DESC
+
+
+SELECT *
+FROM all_sessions
+
+WITH sku_count AS (
+	SELECT
+		country,
+		COUNT(productsku) AS total_products
+	FROM all_sessions al
+	JOIN visitors v ON al.fullvisitorid = v.fullvisitorid
+	GROUP BY 1
+)
+
+SELECT
+	country,
+	CAST(AVG(total_products) AS NUMERIC(10,2))
+FROM
+	sku_count
+GROUP BY 1
+ORDER BY 2 DESC
+
+WITH sku_count AS (
+	SELECT
+		al.fullvisitorid,
+		country,
+		city,
+		COUNT(productsku) AS total_products
+	FROM all_sessions al
+	JOIN visitors v ON al.fullvisitorid = v.fullvisitorid
+	GROUP BY 1,2,3
+)
+
+SELECT
+	city,
+	country,
+	CAST(AVG(total_products) AS NUMERIC(10,2))
+FROM
+	sku_count
+GROUP BY 1,2,total_products
+ORDER BY 3 DESC

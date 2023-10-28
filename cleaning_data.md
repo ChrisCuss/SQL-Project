@@ -1,10 +1,10 @@
 What issues will you address by cleaning the data?
 
--- Missing Values: Identify and/or remove missing values.
--- Duplicate Records: Eliminate duplicate rows.
--- Inconsistent Formatting: Standardize date formats, text casing, and numerical values for uniformity.
--- Outliers: Identify outliers that could skew the analysis.
--- Data Integrity: Make sure all the ''keys'' connect the tables properly for the data flow.
+- Missing Values: Identify and/or remove missing values.
+- Duplicate Records: Eliminate duplicate rows.
+- Inconsistent Formatting: Standardize date formats, text casing, and numerical values for uniformity.
+- Outliers: Identify outliers that could skew the analysis.
+- Data Integrity: Make sure all the ''keys'' connect the tables properly for the data flow.
 
 Queries:
 Below, provide the SQL queries you used to clean your data.
@@ -142,24 +142,28 @@ Below, provide the SQL queries you used to clean your data.
 	-- Repeat for all tables with date columns
 
 -- Change timeonsite to INT
+
 	ALTER TABLE analytics
 	ALTER COLUMN timeonsite TYPE INTEGER USING timeonsite::INTEGER;
 	-- Repeat for all_sessions table
 
 -- Changing totaltransactionsrevenue and transactionrevenue in the all_sessions table to a NUMERIC(10,2)
-	UPDATE all_sessions
-	SET totaltransactionrevenue = CAST(totaltransactionrevenue AS NUMERIC(10,2)) / 1000000;
+
+		UPDATE all_sessions
+		SET totaltransactionrevenue = CAST(totaltransactionrevenue AS NUMERIC(10,2)) / 1000000;
 
 	ALTER TABLE all_sessions
 	ALTER COLUMN totaltransactionrevenue TYPE NUMERIC(10,2)USING CAST(totaltransactionrevenue AS NUMERIC(10,2));
 
 -- Changing transactions to a SMALLINT
+
 	ALTER TABLE all_sessions
 	ALTER COLUMN transactions TYPE SMALLINT USING CAST(transactions AS SMALLINT);
 
 -- Changing units_sold and pageviews in the analytics table to SMALLINT
-	ALTER TABLE analytics
-	ALTER COLUMN units_sold TYPE SMALLINT USING units_sold::SMALLINT;
+		
+		ALTER TABLE analytics
+		ALTER COLUMN units_sold TYPE SMALLINT USING units_sold::SMALLINT;
 
 -- Chaning total_ordered, restockingleadtime and stocklevel to SMALLINT from sales_report
 
@@ -181,40 +185,40 @@ Below, provide the SQL queries you used to clean your data.
 
 -- For this one, I knew it was going to get a bit tricker, so I asked ChatGPT to help me create two queries. One for the stats of each column and another to find the specific outliers in that column.
 
-WITH Stats AS (
-  SELECT 
-    MIN(your_column) AS min_value,
-    MAX(your_column) AS max_value,
-    AVG(your_column) AS avg_value,
-    PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY your_column) AS q1,
-    PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY your_column) AS q3
-  FROM your_table
-)
-SELECT 
-  min_value, 
-  max_value, 
-  avg_value,
-  q1,
-  q3,
-  q3 + 1.5 * (q3 - q1) AS upper_outlier_limit,
-  q1 - 1.5 * (q3 - q1) AS lower_outlier_limit
-FROM Stats;
+	WITH Stats AS (
+	  SELECT 
+	    MIN(your_column) AS min_value,
+	    MAX(your_column) AS max_value,
+	    AVG(your_column) AS avg_value,
+	    PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY your_column) AS q1,
+	    PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY your_column) AS q3
+	  FROM your_table
+	)
+	SELECT 
+	  min_value, 
+	  max_value, 
+	  avg_value,
+	  q1,
+	  q3,
+	  q3 + 1.5 * (q3 - q1) AS upper_outlier_limit,
+	  q1 - 1.5 * (q3 - q1) AS lower_outlier_limit
+	FROM Stats;
 
-SELECT column_name
-FROM table_name
-WHERE column_name > (SELECT AVG(column_name) + 3 * STDDEV(column_name) FROM table_name)
-   OR column_name < (SELECT AVG(column_name) - 3 * STDDEV(column_name) FROM table_name);
+	SELECT column_name
+	FROM table_name
+	WHERE column_name > (SELECT AVG(column_name) + 3 * STDDEV(column_name) FROM table_name)
+	   OR column_name < (SELECT AVG(column_name) - 3 * STDDEV(column_name) FROM table_name);
 
 5. Data Integrity
 
 -- I created a new table called visitors in order to house the unique fullvisitorids.
 
-	CREATE TABLE visitors (
-  fullvisitorid INT PRIMARY KEY,
-  country VARCHAR(21),
-  city VARCHAR(34),
-  totaltransactionrevenue NUMERIC(10,2),
-  transactions SMALLINT
+		CREATE TABLE visitors (
+	  fullvisitorid INT PRIMARY KEY,
+	  country VARCHAR(21),
+	  city VARCHAR(34),
+	  totaltransactionrevenue NUMERIC(10,2),
+	  transactions SMALLINT
 );
 
 	-- Then I copied the data from all_sessions
