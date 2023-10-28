@@ -1,7 +1,7 @@
 Answer the following questions and provide the SQL queries used to find the answer.
 
     
-**Question 1: Which cities and countries have the highest level of transaction revenues on the site?**
+## **Question 1: Which cities and countries have the highest level of transaction revenues on the site?**
 
 
 ### SQL Queries:
@@ -49,7 +49,7 @@ Answer the following questions and provide the SQL queries used to find the answ
 	#4. Palo Alto
 	#5. Tel Aviv-Yafo
 
-**Question 2: What is the average number of products ordered from visitors in each city and country?**
+## **Question 2: What is the average number of products ordered from visitors in each city and country?**
 
 
 ### SQL Queries:
@@ -128,7 +128,7 @@ Answer the following questions and provide the SQL queries used to find the answ
 	#5. San Jose
 
 
-**Question 3: Is there any pattern in the types (product categories) of products ordered from visitors in each city and country?**
+## **Question 3: Is there any pattern in the types (product categories) of products ordered from visitors in each city and country?**
 
 
 ### SQL Queries:
@@ -261,7 +261,7 @@ Answer the following questions and provide the SQL queries used to find the answ
 -- In most cities, the top category is "Home/Apparel/Men's/Men's-T-Shirts/", but when you start to look at things a bit wider by country or overall category sales, you can clearly see that the top selling category is "Home/Shop by Brand/YouTube/".
 
 
-**Question 4: What is the top-selling product from each city/country? Can we find any pattern worthy of noting in the products sold?**
+## **Question 4: What is the top-selling product from each city/country? Can we find any pattern worthy of noting in the products sold?**
 
 
 ### SQL Queries: 
@@ -401,16 +401,99 @@ Answer the following questions and provide the SQL queries used to find the answ
 -- I want to start by saying that there's someone in Mountain View USA hoarding wayyy to many Nest Security Cameras. Also, the "Google Men's 100% Cotton Short Sleeve Hero Tee White" appears to be the most popular products, especially in the United States. For India, the most popular product is "YouTube Custom Decals" and for Canada it's "YouTube Twill Cap". The most popular products overall are the most popular products in our top cities and countries from the data but when you start to look at the cities and countries with fewer orders, the top products shift. My suspision is that more orders from those countries is needed to properly assess a patern.
 
 
+## **Question 5: Can we summarize the impact of revenue generated from each city/country?**
 
-**Question 5: Can we summarize the impact of revenue generated from each city/country?**
+### SQL Queries:
 
-SQL Queries:
+-- Impact overall by looking at what percentage each city & country represent of the overall revenue.
 
+	WITH total_revenue AS (
+		SELECT SUM(revenue) AS total_revenue
+		FROM visitors v
+		JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+		WHERE revenue IS NOT NULL
+				AND city != 'N/A'
+	),
+	city_country_revenue AS (
+		SELECT 
+			country, 
+			city, 
+			SUM(revenue) AS city_country_revenue
+		FROM visitors v
+		JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+		WHERE revenue IS NOT NULL
+				AND city != 'N/A'
+		GROUP BY 1,2
+	)
+	SELECT
+		ccr.country, 
+	    ccr.city, 
+	    ccr.city_country_revenue,
+	    (ccr.city_country_revenue / tr.total_revenue) * 100 AS percentage_of_total
+	FROM
+		city_country_revenue ccr,
+		total_revenue tr
+	ORDER BY 3 DESC, 1, 2
 
+-- Cities Only
 
-Answer:
+	WITH total_revenue AS (
+	SELECT SUM(revenue) AS total_revenue
+	FROM visitors v
+	JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+	WHERE revenue IS NOT NULL
+			AND city != 'N/A'
+	),
+	city_revenue AS (
+		SELECT 
+			city, 
+			SUM(revenue) AS city_revenue
+		FROM visitors v
+		JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+		WHERE revenue IS NOT NULL
+				AND city != 'N/A'
+		GROUP BY 1
+	)
+	SELECT 
+	    cr.city, 
+	    cr.city_revenue,
+	    (cr.city_revenue / tr.total_revenue) * 100 AS percentage_of_total
+	FROM
+		city_revenue cr,
+		total_revenue tr
+	ORDER BY 2 DESC, 1
 
+-- Countries only
 
+	WITH total_revenue AS (
+		SELECT SUM(revenue) AS total_revenue
+		FROM visitors v
+		JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+		WHERE revenue IS NOT NULL
+				AND city != 'N/A'
+	),
+	country_revenue AS (
+		SELECT 
+			country, 
+			SUM(revenue) AS country_revenue
+		FROM visitors v
+		JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+		WHERE revenue IS NOT NULL
+				AND city != 'N/A'
+		GROUP BY 1
+	)
+	SELECT 
+	    cr.country, 
+	    cr.country_revenue,
+	    (cr.country_revenue / tr.total_revenue) * 100 AS percentage_of_total
+	FROM
+		country_revenue cr,
+		total_revenue tr
+	ORDER BY 2 DESC, 1
+
+### Answer:
+
+-- No surprises here. The USA represents over 86% of the revenue. 
 
 
 
