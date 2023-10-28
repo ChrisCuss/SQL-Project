@@ -19,7 +19,8 @@ This project serves to show the application of the skills and concepts we learne
 ## Process
 ### Step 1: Import data to PGadmin
 ### Step 2: Clean the data (Missing Values, Duplicates, Formatting, Outliers, etc)
-### Step 3: 
+### Step 3: Run queries to answer all the questions in starting_with_questions
+### Step 4: 
 
 ## Results
 (fill in what you discovered this data could tell you and how you used the data to answer those questions)
