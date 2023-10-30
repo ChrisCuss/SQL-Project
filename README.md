@@ -19,14 +19,27 @@ This project serves to show the application of the skills and concepts we learne
 ## Process
 ### Step 1: Import data to PGadmin
 ### Step 2: Clean the data (Missing Values, Duplicates, Formatting, Outliers, etc)
-### Step 3: Run queries to answer all the questions in starting_with_questions
-### Step 4: 
+### Step 3: QA the data
+### Step 4: Run queries to answer all the questions in starting_with_questions
+### Step 5: Create 3 new questions and answer them using quieries in the starting_with_questions
 
 ## Results
-(fill in what you discovered this data could tell you and how you used the data to answer those questions)
+	- This data is likely from an online store.
+	- The countries with the most customers are US, Israel and Australia.
+	- The top cities are San Francisco, Sunnyvale and Atlanta.
+	- The category that has the most products sold is Home/Apparel/Men's/Men's-T-Shirts/.
+	- Top products sold are Google Men's 100% Cotton Short Sleeve Hero Tee White and YouTube Custom Decals.
+	- The USA representa over 85% of this website's revenue.
 
 ## Challenges 
-(discuss challenges you faced in the project)
+	- Not knowing the context of the data.
+	- Data was very ''dirty'' and unorganised.
+	- The data contained way to many null values in a lot of columns.
+	- Some columns in tables seemed like they belonged in a completely different table. i.e most of the columns from the all_sessions table.
+	- Having to backup the database multiple times due to how many changes were needed to be made to a lot of the data.
+	- Without context, it was difficult to assess the importance and impact of any outlier values that were found.
 
 ## Future Goals
-(what would you do if you had more time?)
+	- If I had more time I'd create Views, Temp tables or just create new additional tables. This would have come in handy when cleaning the data and eliminating some of the columns without loosing the original data.
+	- Some of the datatypes for my columns aren't the most efficient. If I had more time I'd go throughe every VARCHAR column and set the column to only accept a specific number of characters insead of the blanket VARCHACHAR(255). Specially in the analytics table where this could help optimize and speed up queries.
+

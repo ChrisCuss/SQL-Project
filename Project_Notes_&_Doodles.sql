@@ -402,3 +402,193 @@ FROM
 	sku_count
 GROUP BY 1,2,total_products
 ORDER BY 3 DESC
+
+SELECT *
+FROM all_sessions
+LIMIT 1000
+
+
+SELECT
+	v.city,
+	v.country,
+	al.v2productname,
+	COUNT(*) as order_count
+FROM all_sessions al
+JOIN visitors v ON al.fullvisitorid = v.fullvisitorid
+WHERE 	city != 'N/A'
+		AND country != 'N/A'
+GROUP BY 1,2,3
+ORDER BY 4 DESC;
+
+	
+	
+WITH ranked_products AS (
+	SELECT
+		al.v2productname,
+		COUNT(al.v2productname) AS order_count,
+		RANK() OVER (ORDER BY COUNT(al.v2productname) DESC) AS prodRank
+	FROM all_sessions al
+	JOIN visitors v ON al.fullvisitorid = v.fullvisitorid
+	GROUP BY 1
+	ORDER BY 1, 3
+	)
+	SELECT
+			v2productname,
+			order_count,
+			prodRank
+	FROM ranked_products
+	GROUP BY
+		1,
+		ranked_products.order_count,
+		ranked_products.v2productname,
+		ranked_products.prodrank
+	ORDER BY 3,1
+	
+	WITH ranked_products AS (
+	SELECT
+		v.city,
+		al.v2productname,
+		COUNT(al.v2productname) AS order_count,
+		RANK() OVER (PARTITION BY v.city ORDER BY COUNT(al.v2productname) DESC) AS prodRank
+	FROM all_sessions al
+	JOIN visitors v ON al.fullvisitorid = v.fullvisitorid
+	GROUP BY 1, 2
+	ORDER BY 1, 4
+	)
+	SELECT 
+			city,
+			v2productname,
+			order_count,
+			prodRank
+	FROM ranked_products
+	WHERE prodRank = 1
+			AND city!= 'N/A'
+	GROUP BY
+		1,2,3,
+		ranked_products.order_count,
+		ranked_products.city,
+		ranked_products.v2productname,
+		ranked_products.prodrank
+	ORDER BY 3 DESC,1
+	
+		WITH ranked_products AS (
+	SELECT
+		v.country,
+		al.v2productname,
+		COUNT(al.v2productname) AS order_count,
+		RANK() OVER (PARTITION BY v.country ORDER BY COUNT(al.v2productname) DESC) AS prodRank
+	FROM all_sessions al
+	JOIN visitors v ON al.fullvisitorid = v.fullvisitorid
+	GROUP BY 1, 2
+	ORDER BY 1, 4
+	)
+	SELECT 
+			country,
+			v2productname,
+			order_count,
+			prodRank
+	FROM ranked_products
+	WHERE prodRank = 1
+			AND country != 'N/A'
+	GROUP BY
+		1,2,3,
+		ranked_products.order_count,
+		ranked_products.country,
+		ranked_products.v2productname,
+		ranked_products.prodrank
+	ORDER BY 3 DESC,1
+	
+WITH sum_allrevenue AS (
+	SELECT SUM(revenue) AS total_revenue
+	FROM visitors v
+	JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+	
+)
+
+SELECT
+	country,
+	city,
+	SUM(a.revenue) AS revSum
+FROM visitors v
+JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+WHERE revenue IS NOT NULL
+GROUP BY 1,2
+ORDER BY 3 DESC
+
+SELECT SUM(revenue)
+FROM analytics
+LIMIT 1
+
+WITH total_revenue AS (
+	SELECT SUM(revenue) AS total_revenue
+	FROM visitors v
+	JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+	WHERE revenue IS NOT NULL
+			AND city != 'N/A'
+),
+country_revenue AS (
+	SELECT 
+		country, 
+		SUM(revenue) AS country_revenue
+	FROM visitors v
+	JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+	WHERE revenue IS NOT NULL
+			AND city != 'N/A'
+	GROUP BY 1
+)
+SELECT 
+    cr.country, 
+    cr.country_revenue,
+    (cr.country_revenue / tr.total_revenue) * 100 AS percentage_of_total
+FROM
+	country_revenue cr,
+	total_revenue tr
+ORDER BY 2 DESC, 1
+
+	WITH total_revenue AS (
+	SELECT SUM(revenue) AS total_revenue
+	FROM visitors v
+	JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+	WHERE revenue IS NOT NULL
+			AND city != 'N/A'
+	),
+	city_revenue AS (
+		SELECT 
+			city, 
+			SUM(revenue) AS city_revenue
+		FROM visitors v
+		JOIN analytics a ON v.fullvisitorid = a.fullvisitorid
+		WHERE revenue IS NOT NULL
+				AND city != 'N/A'
+		GROUP BY 1
+	)
+	SELECT 
+	    cr.city, 
+	    cr.city_revenue,
+	    (cr.city_revenue / tr.total_revenue) * 100 AS percentage_of_total
+	FROM
+		city_revenue cr,
+		total_revenue tr
+	ORDER BY 2 DESC, 1
+	
+WITH men_products AS(
+	SELECT
+		COUNT(*) AS men_product
+	FROM products
+	WHERE name LIKE 'Men%'
+),
+women_products AS(
+	SELECT
+		COUNT(*) AS women_product
+	FROM products
+	WHERE name LIKE 'Women%'
+)
+
+SELECT
+	men_product AS total_men_products,
+	women_product AS total_women_products
+FROM
+	men_products,
+	women_products
+	
+	

@@ -9,7 +9,7 @@ What issues will you address by cleaning the data?
 Queries:
 Below, provide the SQL queries you used to clean your data.
 
-1. Missing values.
+## 1. Missing values.
 
 -- First I started by going through all of the important columns in every table and running a simple query to find any null values.
 
@@ -45,7 +45,7 @@ Below, provide the SQL queries you used to clean your data.
 	SET timeonsite = '224'
 	WHERE timeonsite IS NULL;
 
-2. Duplicates
+## 2. Duplicates
 
 -- Second, I went through all the tables to find duplicate rows where there shouldn't be any.
 
@@ -60,7 +60,7 @@ Below, provide the SQL queries you used to clean your data.
 
 -- Removing any rows from all sessions
 
-3. Formatting
+## 3. Formatting
 
 -- Now I go through all of the columns from each table and ensure the formatting is correct and each column is the correct/relevant datatype.
 
@@ -181,9 +181,9 @@ Below, provide the SQL queries you used to clean your data.
 	ALTER COLUMN total_ordered TYPE SMALLINT USING CAST(total_ordered AS SMALLINT);
 
 
-4. Outliers
+## 4. Outliers
 
--- For this one, I knew it was going to get a bit tricker, so I asked ChatGPT to help me create two queries. One for the stats of each column and another to find the specific outliers in that column.
+-- For this one, I knew it was going to get a bit tricker, so I asked ChatGPT to help me create two queries. One for the stats of each column and another to find the specific outliers in that column. (Saved this on my computer for future SQL projects).
 
 	WITH Stats AS (
 	  SELECT 
@@ -209,7 +209,7 @@ Below, provide the SQL queries you used to clean your data.
 	WHERE column_name > (SELECT AVG(column_name) + 3 * STDDEV(column_name) FROM table_name)
 	   OR column_name < (SELECT AVG(column_name) - 3 * STDDEV(column_name) FROM table_name);
 
-5. Data Integrity
+## 5. Data Integrity
 
 -- I created a new table called visitors in order to house the unique fullvisitorids.
 
@@ -219,7 +219,7 @@ Below, provide the SQL queries you used to clean your data.
 	  city VARCHAR(34),
 	  totaltransactionrevenue NUMERIC(10,2),
 	  transactions SMALLINT
-);
+	);
 
 	-- Then I copied the data from all_sessions
 
@@ -241,9 +241,8 @@ Below, provide the SQL queries you used to clean your data.
 
 	-- Using the PGadmin GUI, I added primary keys and foreign keys to all the tables
 
-
 -- Now that I have a visitors, I'm able to use this fullvisitorid as a Primary Key for this table and as a Foreign Key for my other tables like all_sessions and analytics.
-	
+
 
 
 
